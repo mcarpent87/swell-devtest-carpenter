@@ -81,13 +81,43 @@ describe('ReviewsController', () => {
 	});
 
 	describe('getReviews()', () => {
-		it.todo('should fetch all reviews');
+		it('should fetch all reviews', async () => {
+			const response = await request(app.getHttpServer()).get('/reviews');
+			const { reviews } = response.body;
+			expect(response.status).toBe(200);
+			expect(reviews).toHaveLength(3);
+		});
 
-		it.todo('should fetch reviews in descending order by date');
+		it('should fetch reviews in descending order by date', async () => {
+			const response = await request(app.getHttpServer()).get('/reviews');
+			const { reviews } = response.body;
+			//convert dates to milliseconds for comparison
+			const dates = reviews.map((review: any) => new Date(review.createdOn).getTime());
+			// Check if the reviews are sorted in descending order by date
+			for (let i = 0; i < dates.length - 1; i++) {
+				expect(dates[i]).toBeGreaterThanOrEqual(dates[i + 1]);
+			}
+		});
 
-		it.todo('should include user data with review');
+		it('should include user data with review', async () => {
+			const response = await request(app.getHttpServer()).get('/reviews');
+			const { reviews } = response.body;
+			reviews.map((review: any) => {
+				expect(review).toHaveProperty('user');
+				expect(review.user).toHaveProperty('id');
+				expect(review.user).toHaveProperty('firstName');
+				expect(review.user).toHaveProperty('lastName');
+			});
+		});
 
-		it.todo('should include company data with review');
+		it('should include company data with review', async () => {
+			const response = await request(app.getHttpServer()).get('/reviews');
+			const { reviews } = response.body;
+			reviews.map((review: any) => {
+				expect(review).toHaveProperty('company');
+				expect(review.company).toHaveProperty('name');
+			});
+		});
 
 		// Feel free to add any additional tests you think are necessary
 	});
