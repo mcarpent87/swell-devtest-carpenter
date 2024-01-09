@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import TaskIcon from '@mui/icons-material/Task';
-import { Alert, Box, Card, Pagination, Rating, useMediaQuery, useTheme } from '@mui/material';
+import {
+	Alert,
+	Box,
+	Card,
+	CircularProgress,
+	Pagination,
+	Rating,
+	useMediaQuery,
+	useTheme,
+} from '@mui/material';
 
 export interface Review {
 	createdOn: string;
@@ -22,6 +31,7 @@ export interface ReviewsListProps {
 export function ReviewsList(props: ReviewsListProps) {
 	const [reviews, setReviews] = useState<Review[]>(props.reviews || []);
 	const [currentPage, setCurrentPage] = useState(1);
+	const [loading, setLoading] = useState(true);
 	const reviewsPerPage = 10;
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -46,6 +56,8 @@ export function ReviewsList(props: ReviewsListProps) {
 				}
 			} catch (error) {
 				console.error('Error fetching reviews:', error);
+			} finally {
+				setLoading(false);
 			}
 		}
 		fetchReviews();
@@ -63,15 +75,21 @@ export function ReviewsList(props: ReviewsListProps) {
 
 	return (
 		<div>
-			{reviews.length === 0 ? ( // If no reviews are available, render this alert
+			{loading ? (
+				//Show loading spinner in loading state
+				<Box
+					sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}
+				>
+					<CircularProgress />
+				</Box>
+			) : reviews.length === 0 ? (
+				// Show Alert if no reviews available after loading
 				<Alert severity="info" icon={<TaskIcon />}>
 					No reviews available
 				</Alert>
 			) : (
-				// Render each review in a card, with pagination
 				<div>
 					<h1>Reviews</h1>
-					{/* TO DO: Make this look better on mobile 100% width on sm screens */}
 					<Box sx={{ width: isMobile ? '100%' : '75%', mb: 5 }}>
 						{currentReviews.map((review) => (
 							<Card key={review.id} sx={{ p: 3, mt: 4 }}>
