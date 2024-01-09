@@ -1,35 +1,56 @@
 import React, { useEffect, useState } from 'react';
 import TaskIcon from '@mui/icons-material/Task';
-import { Alert, Box, Card, Pagination, Rating } from '@mui/material';
+import { Alert, Box, Card, Pagination, Rating, useMediaQuery, useTheme } from '@mui/material';
 
 export interface Review {
+	createdOn: string;
 	id: number;
+	rating: number;
+	reviewText: string;
+	text: string;
+	company: {
+		name: string;
+	};
 	user: {
 		firstName: string;
 		lastName: string;
 	};
-	company: {
-		name: string;
-	};
-	createdOn: string;
-	rating: number;
-	reviewText: string;
 }
-
 export interface ReviewsListProps {
-	reviews?: Review[]; // Making the reviews prop optional
+	reviews?: Review[];
 }
 
 export function ReviewsList(props: ReviewsListProps) {
-	const { reviews: initialReviews = [] } = props;
-	const [reviews, setReviews] = useState<Review[]>(initialReviews); // Define state to hold reviews data
-	const [currentPage, setCurrentPage] = useState(1); // State to track the current page
-	const reviewsPerPage = 10; // Number of reviews to display per page
+	const [reviews, setReviews] = useState<Review[]>(props.reviews || []);
+	const [currentPage, setCurrentPage] = useState(1);
+	const reviewsPerPage = 10;
+	const theme = useTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
 	useEffect(() => {
-		// Set initial reviews when component mounts or when the prop changes
-		setReviews(initialReviews);
-	}, [initialReviews]);
+		// Fetch the reviews data when the component mounts
+		async function fetchReviews() {
+			try {
+				const response = await fetch('/api/reviews');
+				if (response.ok) {
+					const data = await response.json();
+					//set the reviews in state
+					setReviews(
+						data.reviews.map((review: { createdOn: string | number | Date }) => ({
+							...review,
+							//Change format from raw timestamp to mm/dd/yyyy format
+							createdOn: new Date(review.createdOn).toLocaleDateString('en-US'),
+						})),
+					);
+				} else {
+					throw new Error('Failed to fetch reviews');
+				}
+			} catch (error) {
+				console.error('Error fetching reviews:', error);
+			}
+		}
+		fetchReviews();
+	}, []);
 
 	// Logic to get current reviews for the selected page
 	const indexOfLastReview = currentPage * reviewsPerPage;
@@ -43,7 +64,7 @@ export function ReviewsList(props: ReviewsListProps) {
 
 	return (
 		<div>
-			{reviews.length === 0 ? ( // Display a message if reviews are empty
+			{reviews.length === 0 ? ( // If no reviews are available, render this alert
 				<Alert severity="info" icon={<TaskIcon />}>
 					No reviews available
 				</Alert>
@@ -52,7 +73,7 @@ export function ReviewsList(props: ReviewsListProps) {
 				<div>
 					<h1>Reviews</h1>
 					{/* TO DO: Make this look better on mobile 100% width on sm screens */}
-					<Box sx={{ width: '75%' }}>
+					<Box sx={{ width: isMobile ? '100%' : '75%', mb: 5 }}>
 						{currentReviews.map((review) => (
 							<Card key={review.id} sx={{ p: 3, mt: 4 }}>
 								<h4>
@@ -69,7 +90,7 @@ export function ReviewsList(props: ReviewsListProps) {
 							page={currentPage}
 							color="primary"
 							onChange={handlePageChange}
-							sx={{ mt: 2 }}
+							sx={{ width: isMobile ? '350px' : '100%', mt: 2 }}
 						/>
 					</Box>
 				</div>

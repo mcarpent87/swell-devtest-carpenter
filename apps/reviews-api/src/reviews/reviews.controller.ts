@@ -1,4 +1,4 @@
-import { Controller, Get, NotFoundException } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { ReviewsResponse, ReviewsCountResponse, ReviewExt } from './reviews.types';
 import { Review, Company, User } from '@prisma/client';
