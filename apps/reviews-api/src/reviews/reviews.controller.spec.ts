@@ -6,6 +6,19 @@ import { DatabaseService } from '../database/database.service';
 import { ReviewsController } from './reviews.controller';
 import { ReviewsService } from './reviews.service';
 
+export interface Review {
+	createdOn: string;
+	id: number;
+	rating: number;
+	reviewText: string;
+	company: {
+		name: string;
+	};
+	user: {
+		firstName: string;
+		lastName: string;
+	};
+}
 describe('ReviewsController', () => {
 	const user1Id = 'user-1';
 	const user2Id = 'user-2';
@@ -92,7 +105,7 @@ describe('ReviewsController', () => {
 			const response = await request(app.getHttpServer()).get('/reviews');
 			const { reviews } = response.body;
 			//convert dates to milliseconds for comparison
-			const dates = reviews.map((review: any) => new Date(review.createdOn).getTime());
+			const dates = reviews.map((review: Review) => new Date(review.createdOn).getTime());
 			// Check if the reviews are sorted in descending order by date
 			for (let i = 0; i < dates.length - 1; i++) {
 				expect(dates[i]).toBeGreaterThanOrEqual(dates[i + 1]);
@@ -102,7 +115,7 @@ describe('ReviewsController', () => {
 		it('should include user data with review', async () => {
 			const response = await request(app.getHttpServer()).get('/reviews');
 			const { reviews } = response.body;
-			reviews.map((review: any) => {
+			reviews.map((review: Review) => {
 				expect(review).toHaveProperty('user');
 				expect(review.user).toHaveProperty('id');
 				expect(review.user).toHaveProperty('firstName');
@@ -113,12 +126,10 @@ describe('ReviewsController', () => {
 		it('should include company data with review', async () => {
 			const response = await request(app.getHttpServer()).get('/reviews');
 			const { reviews } = response.body;
-			reviews.map((review: any) => {
+			reviews.map((review: Review) => {
 				expect(review).toHaveProperty('company');
 				expect(review.company).toHaveProperty('name');
 			});
 		});
-
-		// Feel free to add any additional tests you think are necessary
 	});
 });

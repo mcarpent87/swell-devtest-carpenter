@@ -8,7 +8,6 @@ describe('ReviewsList', () => {
 	});
 
 	it('should render list of reviews', async () => {
-		// Mock reviews data
 		const mockReviews = [
 			{
 				id: 1,
@@ -36,7 +35,7 @@ describe('ReviewsList', () => {
 			},
 		];
 
-		// Render component with mocked data
+		// Render component with the mocked data
 		render(<ReviewsList reviews={mockReviews} />);
 	});
 
